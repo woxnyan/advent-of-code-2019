@@ -1,3 +1,2 @@
-def a ():
-    return 1,1
-print(a()[0])
+a = {}
+a['a'] = 1

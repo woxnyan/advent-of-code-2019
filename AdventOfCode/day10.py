@@ -29,9 +29,34 @@ for position in allPosition:
     seeAsteroidRepeat[position] = {}
 
 def issame(ax,ay,bx,by,cx,cy):
-  kac=(ax-cx)*(cy-by)
-  kbc=(cx-bx)*(ay-cy)   
-  return kac==kbc,kac
+    kac = 0
+    if cx-ax == 0:
+        if cy>=ay:
+            kac = -9999999999
+        else:
+            kac = 9999999999
+    elif cy-ay == 0:
+        if cx>=ax:
+            kac = 0
+        else:
+            kac = -0.0000000001
+    else:
+        kac=(cy-ay)/(cx-ax)
+    
+    kab = 0
+    if bx-ax == 0:
+        if by>=ay:
+            kab = 9999999999
+        else:
+            kab = -9999999999
+    elif by-ay == 0:
+        if bx>=ax:
+            kab = 0
+        else:
+            kab = -0.0000000001
+    else:
+        kab=(by-ay)/(bx-ax)
+    return kac==kab,kac
 
 for position in allPosition:
     if not position.is_asteroid:
@@ -47,7 +72,15 @@ for position in allPosition:
             checkResult,k = issame(position.x,position.y,positionCheck.x,positionCheck.y,comparePosition.x,comparePosition.y)
             if checkResult:
                 canAdd = False
-                seeAsteroidRepeat[position][k] = 0
+                if k in seeAsteroidRepeat[position]:
+                    if comparePosition not in seeAsteroidRepeat[position][k]:
+                        seeAsteroidRepeat[position][k].append(comparePosition)
+                    if positionCheck not in seeAsteroidRepeat[position][k]:
+                        seeAsteroidRepeat[position][k].append(positionCheck)
+                else:
+                    seeAsteroidRepeat[position][k] = []
+                    seeAsteroidRepeat[position][k].append(comparePosition)
+                    seeAsteroidRepeat[position][k].append(positionCheck)
                 break
             
         if canAdd:
@@ -56,16 +89,41 @@ for position in allPosition:
 maxPoint = None
 maxNum = 0
 for i in seeAsteroid:
-    if len(seeAsteroid[i]) + len(seeAsteroidRepeat[i])>maxNum:
-        maxNum = len(seeAsteroid[i])+ len(seeAsteroidRepeat[i])
+    sumSame=0
+    for k in seeAsteroidRepeat[i]:
+        x1=0
+        x2=0
+        y1=0
+        y2=0
+        x01=0
+        x02=0
+        y01=0
+        y02=0
+        for j in seeAsteroidRepeat[i][k]:
+            if j.x>i.x:
+                x1 = 1
+            elif j.x<i.x:
+                x2 = 1
+            elif j.y>i.y:
+                y1=1
+            elif j.y<i.y:
+                y2=1
+            elif j.x == i.x:
+                if j.y>i.y:
+                    x01 = 1
+                else:
+                    x02 = 1
+            elif j.y == i.y:
+                if j.x>i.x:
+                    y01 = 1
+                else:
+                    y02 = 1
+        sumSame += x1+x2+y1+y2+x01+x02+y01+y02
+    if len(seeAsteroid[i]) + sumSame>maxNum:
+        maxNum = len(seeAsteroid[i])+ sumSame
         maxPoint= i
     if i.x==5 and i.y==8:
-        print(len(seeAsteroid[i]) + len(seeAsteroidRepeat[i]))
-        
-
-print(maxNum)
-print(maxPoint.x)
-print(maxPoint.y)
+        print(len(seeAsteroid[i]) + sumSame)
         
         
             
